@@ -5,11 +5,19 @@
   "repository": "https://github.com/jeet0007/NodeJs-Backend-Template.git",
   "author": "jeet0007",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "engines": {
+    "node": "14.15.5"
+  },
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongoose": "^5.11.19"
+    "mongoose": "^5.11.19",
+    "nodemon": "^2.0.7",
+    "query-string": "^6.14.1"
   }
 }
