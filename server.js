@@ -21,6 +21,17 @@ app.get('/', (req, res) => {
 //Connect Database
 connectDb();
 
+const libraryRoutes = require("./routes/libraryRoutes");
+app.use('/api/v1/library/', libraryRoutes);
+
+
+
+
+
+
+
+
+
 app.listen(PORT, () => {
     console.log(`Server listening on port http://localhost:${PORT}/`);
 });
