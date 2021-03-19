@@ -4,15 +4,17 @@ const app = express();
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const BodyParser = require("body-parser");
+const libraryRoutes = require("./routes/libraryRoutes");
+const gamesRoutes = require("./routes/gamesRoutes");
+
 
 const connectDb = require('./config/database');
 
 const PORT = process.env.PORT || 5000
 
 //Set up return json format
-app.use(BodyParser.json()); // converts body into json
-app.use(BodyParser.urlencoded({ extended: false })); // exclude extra details
+app.use(express.json()); // converts body into json
+app.use(express.urlencoded({ extended: false })); // exclude extra details
 app.use(cors());
 
 app.get('/', (req, res) => {
@@ -21,15 +23,9 @@ app.get('/', (req, res) => {
 //Connect Database
 connectDb();
 
-const libraryRoutes = require("./routes/libraryRoutes");
-app.use('/api/v1/library/', libraryRoutes);
 
-
-
-
-
-
-
+app.use('/api/v1/library', libraryRoutes);
+app.use('/api/v1/game', gamesRoutes);
 
 
 app.listen(PORT, () => {

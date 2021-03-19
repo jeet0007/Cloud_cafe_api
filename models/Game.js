@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const gameSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -11,7 +10,14 @@ const gameSchema = new mongoose.Schema({
     },
     images: {
         type: [String]
+    },
+    price: {
+        type: Number
+    },
+    platform: {
+        type: [String]
     }
+
 });
 
 const Game = mongoose.model("Game", gameSchema, "Games");

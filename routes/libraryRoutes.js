@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const gameControllers = require("../controllers/gameControllers");
+const libraryController = require("../controllers/libraryControllers");
 
-router.route("/").get(gameControllers.getAllGames);
+
+router.route("/{UserId}").get(libraryController.getUserLibrary);
 
 module.exports = router;

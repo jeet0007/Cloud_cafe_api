@@ -6,7 +6,8 @@
   "author": "jeet0007",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "engines": {
     "node": "14.15.5"
