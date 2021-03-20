@@ -14,6 +14,9 @@ const gameSchema = new mongoose.Schema({
     price: {
         type: Number
     },
+    url: {
+        type: String
+    },
     platform: {
         type: [String]
     }

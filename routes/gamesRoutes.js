@@ -5,5 +5,6 @@ const gameControllers = require("../controllers/gameControllers");
 
 router.route("/").get(gameControllers.getAllGames);
 router.route("/:id").get(gameControllers.getGameById);
+router.route("/play/:id").get(gameControllers.playGame);
 
 module.exports = router;

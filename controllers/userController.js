@@ -27,7 +27,11 @@ exports.register = async (req, res) => {
             else {
                 res.status(200).send({
                     message: "Success",
-                    data: newUser
+                    data: {
+                        _id: newUser._id,
+                        username: newUser.username,
+                        createdAt: newUser.createdAt,
+                    }
                 });
             }
         })

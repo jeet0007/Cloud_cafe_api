@@ -36,3 +36,8 @@ exports.getGameById = async (req, res) => {
         });
     }
 }
+
+exports.playGame = async (req, res) => {
+    const id = (req.params.id)
+
+}
