@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const libraryRoutes = require("./routes/libraryRoutes");
 const gamesRoutes = require("./routes/gamesRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 
 const connectDb = require('./config/database');
@@ -26,7 +27,7 @@ connectDb();
 
 app.use('/api/v1/library', libraryRoutes);
 app.use('/api/v1/game', gamesRoutes);
-
+app.use('/api/v1/user', userRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port http://localhost:${PORT}/`);
