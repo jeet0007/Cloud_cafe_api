@@ -43,7 +43,8 @@ exports.requestSpotInstances = async () => {
 exports.describeSpotInstanceRequests = async (spotInstanceId) => {
     console.log("Describeing :", spotInstanceId);
     var params = {
-        SpotInstanceRequestIds: []
+        SpotInstanceRequestIds: [],
+        DryRun: true
     };
     params.SpotInstanceRequestIds.push(spotInstanceId);
     ec2.describeSpotInstanceRequests(params, function (err, data) {
@@ -59,4 +60,34 @@ exports.describeSpotInstanceRequests = async (spotInstanceId) => {
             }
         }
     })
+}
+exports.terminateInstances = async (instanceId) => {
+    var params = {
+        InstanceIds: []
+    };
+    params.InstanceIds.push(instanceId)
+    ec2.terminateInstances(params, function (err, data) {
+        if (err) {
+            console.log(err, err.stack);
+        } else {
+            console.log(data);
+        }                            // successful response
+        /*
+        data = {
+            TerminatingInstances: [
+            {
+            CurrentState: {
+            Code: 32, 
+            Name: "shutting-down"
+            }, 
+            InstanceId: "i-1234567890abcdef0", 
+            PreviousState: {
+            Code: 16, 
+            Name: "running"
+            }
+            }
+            ]
+        }
+        */
+    });
 }

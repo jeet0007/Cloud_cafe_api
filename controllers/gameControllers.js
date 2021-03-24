@@ -1,6 +1,7 @@
 const awsService = require("../services/aws/aws_instance")
 const Game = require("../models/Game");
 const Session = require("../models/Session");
+const User = require("../models/User");
 
 // setup instance params
 
@@ -46,24 +47,49 @@ exports.getGameById = async (req, res) => {
 
 exports.playGame = async (req, res) => {
     const { userId, gameId } = req.body;
-    //create an instance
+    console.log(req.body)
+    if (!userId || !gameId) {
+        return res.status(400).send({
+            message: "Failed",
+            data: "Incomplete information"
+        })
+    }
+    //Check user credits
+    const user = await User.findById(userId);
+    const userHasEnoughCredit = false;
+    if (user) {
+        console.log("User Found", user);
+    } else {
+        return res.status(200).send({
+            message: "Failed",
+            data: "User not found"
+        })
+    }
+    // get game info
+    const game = await Game.findById(gameId);
 
-    const requestSpotInstance = await awsService.runInstance();  // Will return id
-    const spotInstanceInfo = await awsService.describeSpotInstanceRequests(requestSpotInstance);
-
-    // create a session 
-
-
-    // Save session to db
-    /**Return a game {
-        userid : String
-        gameid : String
-        url : String
-        statted at : Date Times
-    }*/
-    res.status(200).send({
-        status: "fucked"
-    })
-
+    if (game) {
+        console.log("Game Found", game);
+        if (userHasEnoughCredit) {
+            //create an instance
+            const requestSpotInstance = await awsService.requestSpotInstances()
+            // Will return id
+            const spotInstanceInfo = await awsService.describeSpotInstanceRequests(requestSpotInstance);
+            // create a session 
+        } else {
+            return res.status(200).send({
+                message: "Failed",
+                reason: "Not enough balance",
+                data: game
+            })
+        }
+    } else {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Game not found"
+        })
+    }
+}
+exports.endSession = async (req, res) => {
 
 }
