@@ -58,7 +58,7 @@ exports.playGame = async (req, res) => {
     const user = await User.findById(userId);
     const userHasEnoughCredit = false;
     if (user) {
-        console.log("User Found", user);
+        console.log("User Found", user.username);
     } else {
         return res.status(200).send({
             message: "Failed",
@@ -69,13 +69,14 @@ exports.playGame = async (req, res) => {
     const game = await Game.findById(gameId);
 
     if (game) {
-        console.log("Game Found", game);
+        console.log("Game Found", game.name);
         if (userHasEnoughCredit) {
             //create an instance
             const requestSpotInstance = await awsService.requestSpotInstances()
             // Will return id
             const spotInstanceInfo = await awsService.describeSpotInstanceRequests(requestSpotInstance);
             // create a session 
+
         } else {
             return res.status(200).send({
                 message: "Failed",
