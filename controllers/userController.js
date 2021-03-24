@@ -10,29 +10,49 @@ exports.register = async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).send({
-            message: "Incomplete Information"
+            message: "Failed",
+            error: "Incomplete Information"
         })
     }
+
+    const query = User.where({ username: username })
+    try {
+        const result = await query.findOne(function (err, user) {
+            if (err) {
+                return res.status(500).send({
+                    message: "Server Error",
+                    data: err.message
+                })
+            }
+        });
+        if (result) {
+            return res.status(200).send({
+                message: "Failed",
+                data: "Username taken"
+            })
+        }
+    } catch (error) {
+        return res.status(500).send({
+            message: "Server Error",
+            data: err.message
+        })
+    }
+    //Create new user
     try {
         const hashed = await bcrypt.hashSync(password, 10);
         const newUser = new User({
             username: username,
             password: hashed
         })
-
-        newUser.save(function (err, data) {
+        const result = await newUser.save(function (err, data) {
             if (err) {
-                console.log(error);
+                return res.status(500).send({
+                    message: "Server Error",
+                    data: err.message
+                })
             }
-            else {
-                res.status(200).send({
-                    message: "Success",
-                    data: {
-                        _id: newUser._id,
-                        username: newUser.username,
-                        createdAt: newUser.createdAt,
-                    }
-                });
+            if (data) {
+                return res.status(200).redirect("/sign-in")
             }
         })
     } catch (err) {
@@ -41,8 +61,6 @@ exports.register = async (req, res) => {
             data: err.message
         })
     }
-
-
 }
 
 
@@ -89,3 +107,4 @@ exports.authenticate = async (req, res) => {
         })
     }
 }
+
