@@ -90,7 +90,6 @@ exports.playGame = async (req, res) => {
                     const InstanceId = spotInstanceInfo.data
                     console.log("Instanceid : ", spotInstanceInfo)
 
-                    await sleep(60000);
                     // Get public ip
                     const instanceInfo = await awsService.describeInstances(InstanceId);
                     const instanceInfoData = instanceInfo.data;
