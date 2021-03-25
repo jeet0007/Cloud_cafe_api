@@ -80,7 +80,7 @@ exports.playGame = async (req, res) => {
             //create an instance
             const requestSpotInstance = await awsService.requestSpotInstances()
             // { message: "Success", data: "sir-yvfg2ixq" };
-            await sleep(50000);
+            await sleep(60000);
             const { message, data } = requestSpotInstance
             if (message === "Success") {
                 // Will return id
