@@ -78,14 +78,17 @@ exports.playGame = async (req, res) => {
             // TODO:Check prior sessions
             const query = Session.where({
                 UserId: userId,
-                GameId: gameId
+                GameId: gameId,
+                active: true
             })
+            let exixtSession = false;
             query.findOne((err, session) => {
                 if (err) {
                     console.log("No sessions found")
                 }
                 if (session) {
                     console.log("Session found", session)
+                    exixtSession = true;
                     return res.status(200).send({
                         message: "Success",
                         data: {
@@ -96,55 +99,58 @@ exports.playGame = async (req, res) => {
                     })
                 }
             })
-            //create an instance
-            const requestSpotInstance = await awsService.requestSpotInstances()
-            // { message: "Success", data: "sir-yvfg2ixq" };
-            await sleep(60000);
-            const { message, data } = requestSpotInstance
-            if (message === "Success") {
-                // Will return id
-                const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
+            if (exixtSession === false) {
+                //create an instance
+                const requestSpotInstance = await awsService.requestSpotInstances()
+                // { message: "Success", data: "sir-yvfg2ixq" };
+                await sleep(6000);
+                const { message, data } = requestSpotInstance
+                if (message === "Success") {
+                    // Will return id
+                    const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
 
-                if (spotInstanceInfo.message === "Success") {
-                    const InstanceId = spotInstanceInfo.data
-                    console.log("Instanceid : ", spotInstanceInfo)
-                    // Get public ip
-                    const instanceInfo = await awsService.describeInstances(InstanceId);
-                    const instanceInfoData = instanceInfo.data;
-                    console.log("ip:", instanceInfoData)
-                    const { State } = instanceInfoData
-                    if (State.Code === 16) {
-                        console.log("Instance Running");
-                        const { PublicIpAddress } = instanceInfoData;
-                        // create a session 
-                        const newSession = new Session({
-                            UserId: userId,
-                            GameId: gameId,
-                            instanceId: InstanceId,
-                            url: `https://${PublicIpAddress}:8443/`,
-                            active: true
-                        })
-                        await newSession.save()
+                    if (spotInstanceInfo.message === "Success") {
+                        const InstanceId = spotInstanceInfo.data
+                        console.log("Instanceid : ", spotInstanceInfo)
+                        // Get public ip
+                        const instanceInfo = await awsService.describeInstances(InstanceId);
+                        const instanceInfoData = instanceInfo.data;
+                        console.log("ip:", instanceInfoData)
+                        const { State } = instanceInfoData
+                        if (State.Code === 16) {
+                            console.log("Instance Running");
+                            const { PublicIpAddress } = instanceInfoData;
+                            // create a session 
+                            const newSession = new Session({
+                                UserId: userId,
+                                GameId: gameId,
+                                instanceId: InstanceId,
+                                url: `https://${PublicIpAddress}:8443/`,
+                                active: true
+                            })
+                            await newSession.save()
+                            return res.status(200).send({
+                                message: "Success",
+                                data: {
+                                    url: `https://${PublicIpAddress}:8443/`,
+                                    name: game.name,
+                                    sessionId: newSession._id
+                                }
+                            })
+                        } else if (State.Code === 48) {
+                            console.log("Instance terminated");
+                        } else {
+                            console.log("Instance was not running")
+                        }
+                        //return geme with url
                         return res.status(200).send({
                             message: "Success",
-                            data: {
-                                url: `https://${PublicIpAddress}:8443/`,
-                                name: game.name,
-                                sessionId: newSession._id
-                            }
+                            data: game
                         })
-                    } else if (State.Code === 48) {
-                        console.log("Instance terminated");
-                    } else {
-                        console.log("Instance was not running")
                     }
-                    //return geme with url
-                    return res.status(200).send({
-                        message: "Success",
-                        data: game
-                    })
                 }
             }
+
             // handle error
         } else {
             return res.status(200).send({
