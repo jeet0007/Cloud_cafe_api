@@ -16,7 +16,9 @@ const PORT = process.env.PORT || 5000
 //Set up return json format
 app.use(express.json()); // converts body into json
 app.use(express.urlencoded({ extended: false })); // exclude extra details
-app.use(cors());
+app.use(cors({
+    origin: "https://cloud-cafe-webapp.herokuapp.com"
+}));
 
 app.get('/', (req, res) => {
     res.send("The database is working")
