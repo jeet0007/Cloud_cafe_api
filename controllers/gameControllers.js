@@ -89,7 +89,6 @@ exports.playGame = async (req, res) => {
                 if (spotInstanceInfo.message === "Success") {
                     const InstanceId = spotInstanceInfo.data
                     console.log("Instanceid : ", spotInstanceInfo)
-
                     // Get public ip
                     const instanceInfo = await awsService.describeInstances(InstanceId);
                     const instanceInfoData = instanceInfo.data;
