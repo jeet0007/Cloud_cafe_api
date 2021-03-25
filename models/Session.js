@@ -7,7 +7,10 @@ const SessionSchema = new mongoose.Schema({
     startTime: {
         type: Date,
         default: Date.now
-    }
+    },
+    endTime: Date,
+    instanceId: String,
+    url: String
 });
 
 

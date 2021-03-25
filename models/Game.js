@@ -19,6 +19,10 @@ const gameSchema = new mongoose.Schema({
     },
     platform: {
         type: [String]
+    },
+    ami: {
+        type: String,
+        default: "None"
     }
 
 });
