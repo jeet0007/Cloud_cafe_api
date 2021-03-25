@@ -17,6 +17,8 @@ const PORT = process.env.PORT || 5000
 app.use(express.json()); // converts body into json
 app.use(express.urlencoded({ extended: false })); // exclude extra details
 
+app.use(cors())
+
 app.get('/', (req, res) => {
     res.send("The database is working")
 });
