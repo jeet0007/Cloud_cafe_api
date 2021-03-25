@@ -10,7 +10,12 @@ const SessionSchema = new mongoose.Schema({
     },
     endTime: Date,
     instanceId: String,
-    url: String
+    url: String,
+    active: {
+        type: Boolean,
+        default: true
+    }
+
 });
 
 

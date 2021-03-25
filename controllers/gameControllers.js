@@ -56,6 +56,7 @@ exports.playGame = async (req, res) => {
     }
     // TODO:Check prior sessions
 
+
     //Check user credits
     const user = await User.findById(userId);
     let userHasEnoughCredit = false;
@@ -77,8 +78,8 @@ exports.playGame = async (req, res) => {
         console.log("Game Found", game.name);
         if (userHasEnoughCredit) {
             //create an instance
-            // const requestSpotInstance = await awsService.requestSpotInstances()
-            const { message, data } = { message: "Success", data: "sir-vek8ijqn" }
+            const requestSpotInstance = await awsService.requestSpotInstances()
+            const { message, data } = requestSpotInstance;
             if (message === "Success") {
                 // Will return id
                 const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
@@ -99,12 +100,14 @@ exports.playGame = async (req, res) => {
                             UserId: userId,
                             GameId: gameId,
                             instanceId: InstanceId,
+                            url: `https://${PublicIpAddress}:8443/`,
+                            active: true
                         })
                         await newSession.save()
                         return res.status(200).send({
                             message: "Success",
                             data: {
-                                url: `https://${PublicIpAddress}:8443`,
+                                url: `https://${PublicIpAddress}:8443/`,
                                 name: game.name,
                                 sessionId: newSession._id
                             }
