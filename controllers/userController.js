@@ -1,5 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const Session = require("../models/Session");
+const awsService = require("../services/aws/aws_instance")
+
 
 
 exports.getUserbyId = async (req, res) => {
@@ -107,4 +110,62 @@ exports.authenticate = async (req, res) => {
         })
     }
 }
+exports.getAllSessions = async (req, res) => {
+    const UserId = (req.params.UserId);
+    console.log("Getting all sessions :", UserId)
+    if (!UserId) {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Incomplete info"
+        })
+    }
+
+    const query = Session.where({
+        UserId: UserId,
+        active: true
+    })
+    query.find((err, sessions) => {
+        if (err) {
+            console.log("No sessions found")
+            return res.status(200).send({
+                message: "Failed",
+                data: "no sessions found"
+            })
+        }
+        if (sessions) {
+            console.log("Sessions found", sessions);
+            return res.status(200).send({
+                message: "Success",
+                data: sessions
+            })
+        }
+    })
+}
+
+exports.endSession = async (req, res) => {
+    const sessionId = (req.params.SessionId);
+    if (!sessionId) {
+        return res.send(404).send({
+            message: "Failed",
+            data: "Incomplete information"
+        })
+    }
+
+    const session = await Session.findById(sessionId);
+    if (session) {
+        await awsService.terminateInstances(session.instanceId);
+        res.status(200).send({
+            message: "Success",
+            data: session
+        })
+    } else {
+        return res.send(404).send({
+            message: "Failed",
+            data: "Session not found"
+        })
+    }
+
+}
+
+
 
