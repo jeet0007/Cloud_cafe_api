@@ -108,7 +108,6 @@ exports.playGame = async (req, res) => {
                 if (message === "Success") {
                     // Will return id
                     const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
-
                     if (spotInstanceInfo.message === "Success") {
                         const InstanceId = spotInstanceInfo.data
                         console.log("Instanceid : ", spotInstanceInfo)
@@ -150,8 +149,6 @@ exports.playGame = async (req, res) => {
                     }
                 }
             }
-
-            // handle error
         } else {
             return res.status(200).send({
                 message: "Failed",
