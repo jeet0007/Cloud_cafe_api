@@ -54,8 +54,6 @@ exports.playGame = async (req, res) => {
             data: "Incomplete information"
         })
     }
-    // TODO:Check prior sessions
-
 
     //Check user credits
     const user = await User.findById(userId);
@@ -77,6 +75,27 @@ exports.playGame = async (req, res) => {
     if (game) {
         console.log("Game Found", game.name);
         if (userHasEnoughCredit) {
+            // TODO:Check prior sessions
+            const query = Session.where({
+                UserId: userId,
+                GameId: gameId
+            })
+            query.findOne((err, session) => {
+                if (err) {
+                    console.log("No sessions found")
+                }
+                if (session) {
+                    console.log("Session found", session)
+                    return res.status(200).send({
+                        message: "Success",
+                        data: {
+                            url: session.url,
+                            name: game.name,
+                            sessionId: session._id
+                        }
+                    })
+                }
+            })
             //create an instance
             const requestSpotInstance = await awsService.requestSpotInstances()
             // { message: "Success", data: "sir-yvfg2ixq" };
