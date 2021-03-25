@@ -17,13 +17,14 @@ exports.requestSpotInstances = async (instanceId) => {
         LaunchSpecification: {
             ImageId: "ami-0958df9e9271ffe62",
             KeyName: "shivCloudKey1",
-            InstanceType: "g4dn.xlarge",
+            InstanceType: "t2.micro",
             Placement: {
                 AvailabilityZone: "ap-southeast-1a"
             }
         },
-        SpotPrice: "0.45"
+        SpotPrice: "0.40"
     };
+    // g4dn.xlarge
     const promise = new Promise(function (resolve, reject) {
         ec2.requestSpotInstances(params, function (err, data) {
             if (err) {
@@ -45,13 +46,14 @@ exports.requestSpotInstances = async (instanceId) => {
     return promise
 }
 exports.describeSpotInstanceRequests = async (spotInstanceId) => {
-    console.log("Describeing :", spotInstanceId);
     var params = {
         SpotInstanceRequestIds: [],
         DryRun: false
     };
+    params.SpotInstanceRequestIds.push(spotInstanceId);
+    console.log("Describeing :", params.SpotInstanceRequestIds[0]);
+
     const promise = new Promise(function (resolve, reject) {
-        params.SpotInstanceRequestIds.push(spotInstanceId);
         ec2.describeSpotInstanceRequests(params, (err, data) => {
             if (err) {
                 console.log(err, err.stack);
@@ -61,7 +63,7 @@ exports.describeSpotInstanceRequests = async (spotInstanceId) => {
                 })
             }
             else {
-                console.log("Successfully launched a new instance")
+                console.log("Describe request result : ", data.SpotInstanceRequests[0])
                 resolve({
                     message: "Success",
                     data: data.SpotInstanceRequests[0].InstanceId
@@ -74,26 +76,34 @@ exports.describeSpotInstanceRequests = async (spotInstanceId) => {
 
 exports.describeInstances = async (instanceId) => {
     const params = {
-        InstanceIds: []
+        InstanceIds: [instanceId]
     };
-    params.InstanceIds.push(instanceId)
-    const promise = new Promise(function (resolve, reject) {
-        ec2.describeInstances(params, function (err, data) {
-            if (err) {
-                resolve({
-                    message: "Failed",
-                    data: err
-                })
-            }
-            if (data) {
-                resolve({
-                    message: "Success",
-                    data: data.Reservations[0].Instances[0]
-                })
-            }
-        });
-    })
-    return promise
+    if (instanceId) {
+        const promise = new Promise(function (resolve, reject) {
+            let instanceRunning = false
+            ec2.describeInstances(params, function (err, data) {
+                if (err) {
+                    resolve({
+                        message: "Failed",
+                        data: err
+                    })
+                }
+                if (data) {
+                    console.log("List of reservations", data.Reservations[0])
+                    resolve({
+                        message: "Success",
+                        data: data.Reservations[0].Instances[0]
+                    })
+                }
+            });
+        })
+        return promise
+    } else {
+        return ({
+            message: "Failed",
+            data: "No InstanceId Provided"
+        })
+    }
 }
 
 exports.terminateInstances = async (instanceId) => {
