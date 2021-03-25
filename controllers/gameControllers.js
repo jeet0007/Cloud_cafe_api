@@ -79,13 +79,16 @@ exports.playGame = async (req, res) => {
         if (userHasEnoughCredit) {
             //create an instance
             const requestSpotInstance = await awsService.requestSpotInstances()
-            const { message, data } = requestSpotInstance;
+            // { message: "Success", data: "sir-yvfg2ixq" };
+            await sleep(50000);
+            const { message, data } = requestSpotInstance
             if (message === "Success") {
                 // Will return id
                 const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
+
                 if (spotInstanceInfo.message === "Success") {
                     const InstanceId = spotInstanceInfo.data
-                    console.log("Instanceid : ", InstanceId)
+                    console.log("Instanceid : ", spotInstanceInfo)
 
                     // Get public ip
                     const instanceInfo = await awsService.describeInstances(InstanceId);
@@ -114,6 +117,8 @@ exports.playGame = async (req, res) => {
                         })
                     } else if (State.Code === 48) {
                         console.log("Instance terminated");
+                    } else {
+                        console.log("Instance was not running")
                     }
                     //return geme with url
                     return res.status(200).send({
@@ -139,4 +144,9 @@ exports.playGame = async (req, res) => {
 }
 exports.endSession = async (req, res) => {
 
+}
+
+
+async function sleep(millis) {
+    return new Promise(resolve => setTimeout(resolve, millis));
 }
