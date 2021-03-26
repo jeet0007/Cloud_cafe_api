@@ -73,10 +73,10 @@ exports.playGame = async (req, res) => {
     const game = await Game.findById(gameId);
 
     if (game) {
-        console.log("Game Found", game.name);
+        console.log("Game Found", game);
 
         if (game.isFlash || game.ami === "") {
-            res.status(200).json({
+            return res.status(200).json({
                 message: "Success",
                 data: game,
             });
@@ -110,7 +110,7 @@ exports.playGame = async (req, res) => {
                 //create an instance
                 const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
                 // { message: "Success", data: "sir-yvfg2ixq" };
-                await sleep(6000);
+                await sleep(60000);
                 const { message, data } = requestSpotInstance
                 if (message === "Success") {
                     // Will return id
@@ -135,6 +135,8 @@ exports.playGame = async (req, res) => {
                                 active: true
                             })
                             await newSession.save()
+                            user.credits -= 50
+                            await user.save()
                             return res.status(200).send({
                                 message: "Success",
                                 data: {
