@@ -7,7 +7,8 @@ var ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
 
 // setup instance params
 
-exports.requestSpotInstances = async (instanceId) => {
+exports.requestSpotInstances = async (ami) => {
+
     console.log("requesting : spotInstanceId");
     const params = {
         InstanceCount: 1,
@@ -15,7 +16,7 @@ exports.requestSpotInstances = async (instanceId) => {
         InstanceInterruptionBehavior: "terminate",
         Type: "one-time",
         LaunchSpecification: {
-            ImageId: "ami-0958df9e9271ffe62",
+            ImageId: ami,
             KeyName: "shivCloudKey1",
             InstanceType: "t2.micro",
             Placement: {

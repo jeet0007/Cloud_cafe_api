@@ -23,7 +23,12 @@ const gameSchema = new mongoose.Schema({
     ami: {
         type: String,
         default: "None"
+    },
+    isFlash: {
+        type: Boolean,
+        default: false
     }
+}
 
 });
 

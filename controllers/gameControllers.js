@@ -74,6 +74,13 @@ exports.playGame = async (req, res) => {
 
     if (game) {
         console.log("Game Found", game.name);
+
+        if (game.isFlash || game.ami === "") {
+            res.status(200).json({
+                status: "success",
+                data: game,
+            });
+        }
         if (userHasEnoughCredit) {
             // TODO:Check prior sessions
             const query = Session.where({
@@ -101,7 +108,7 @@ exports.playGame = async (req, res) => {
             })
             if (exixtSession === false) {
                 //create an instance
-                const requestSpotInstance = await awsService.requestSpotInstances()
+                const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
                 // { message: "Success", data: "sir-yvfg2ixq" };
                 await sleep(6000);
                 const { message, data } = requestSpotInstance
