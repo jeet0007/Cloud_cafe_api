@@ -190,6 +190,7 @@ exports.endSession = async (req, res) => {
     if (session) {
         await awsService.terminateInstances(session.instanceId);
         session.active = false
+        session.
         await session.save();
         res.status(200).send({
             message: "Success",

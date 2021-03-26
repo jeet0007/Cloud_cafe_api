@@ -23,7 +23,7 @@ exports.requestSpotInstances = async (ami) => {
                 AvailabilityZone: "ap-southeast-1a"
             }
         },
-        SpotPrice: "0.40"
+        SpotPrice: "0.45"
     };
     // g4dn.xlarge
     const promise = new Promise(function (resolve, reject) {
