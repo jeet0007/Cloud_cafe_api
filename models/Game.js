@@ -28,8 +28,6 @@ const gameSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-}
-
 });
 
 const Game = mongoose.model("Game", gameSchema, "Games");
