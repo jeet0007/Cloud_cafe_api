@@ -6,6 +6,37 @@ const awsService = require("../services/aws/aws_instance")
 
 
 exports.getUserbyId = async (req, res) => {
+    const userId = req.params.UserId
+    if (!userId) {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Incomplete Information"
+        })
+    }
+
+    try {
+        const userExists = await User.findById(userId)
+        if (userExists) {
+            return res.status(200).send({
+                message: "Success",
+                data: {
+                    name: userExists.username,
+                    credits: userExists.credits
+                }
+            })
+        } else {
+            return res.status(200).send({
+                message: "Failed",
+                data: "User not found"
+            })
+        }
+    } catch (Err) {
+        console.log(Err)
+        return res.status(500).send({
+            message: "Failed",
+            data: "Server Error"
+        })
+    }
 
 }
 
