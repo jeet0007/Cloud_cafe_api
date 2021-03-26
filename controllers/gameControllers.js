@@ -77,7 +77,7 @@ exports.playGame = async (req, res) => {
 
         if (game.isFlash || game.ami === "") {
             res.status(200).json({
-                status: "success",
+                message: "success",
                 data: game,
             });
         }
