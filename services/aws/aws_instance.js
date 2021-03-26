@@ -18,7 +18,7 @@ exports.requestSpotInstances = async (ami) => {
         LaunchSpecification: {
             ImageId: ami,
             KeyName: "shivCloudKey1",
-            InstanceType: "t2.micro",
+            InstanceType: "g4dn.xlarge",
             Placement: {
                 AvailabilityZone: "ap-southeast-1a"
             }
