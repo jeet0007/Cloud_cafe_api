@@ -47,17 +47,21 @@ exports.register = async (req, res) => {
             username: username,
             password: hashed
         })
-        const result = await newUser.save(function (err, data) {
-            if (err) {
-                return res.status(500).send({
-                    message: "Server Error",
-                    data: err.message
-                })
-            }
-            if (data) {
-                return res.status(200).redirect("/sign-in")
-            }
-        })
+        const result = await newUser.save()
+        if (result) {
+            return res.status(200).send({
+                message: "Success",
+                data: newUser._id
+            })
+        } else {
+            return res.status(500).send({
+                message: "Server Error",
+                data: err.message
+            })
+        }
+
+
+
     } catch (err) {
         return res.status(500).send({
             message: "Server Error",
@@ -81,8 +85,7 @@ exports.authenticate = async (req, res) => {
             username: user.username
         })
         if (!userExists) {
-
-            return res.status(400).send({
+            return res.status(200).send({
                 message: "Failed",
                 data: "User does not exist"
             })
@@ -90,7 +93,8 @@ exports.authenticate = async (req, res) => {
         console.log("Found user");
         console.log(userExists)
         console.log("Compareing password");
-        if (await bcrypt.compare(user.password, userExists.password)) {
+        const passwordMatch = await bcrypt.compare(user.password, userExists.password)
+        if (passwordMatch) {
             console.log("Done Compareing");
             return res.status(200).send({
                 message: "Success",
