@@ -98,11 +98,7 @@ exports.playGame = async (req, res) => {
                     exixtSession = true;
                     return res.status(200).send({
                         message: "Success",
-                        data: {
-                            url: session.url,
-                            name: game.name,
-                            sessionId: session._id
-                        }
+                        data: session
                     })
                 }
             })

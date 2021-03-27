@@ -190,10 +190,11 @@ exports.endSession = async (req, res) => {
     if (session) {
         await awsService.terminateInstances(session.instanceId);
         session.active = false;
+        session.endTime = Date.now();
         await session.save();
         res.status(200).send({
             message: "Success",
-            data: session
+            data: session,
         })
     } else {
         return res.send(404).send({
@@ -201,7 +202,6 @@ exports.endSession = async (req, res) => {
             data: "Session not found"
         })
     }
-
 }
 
 

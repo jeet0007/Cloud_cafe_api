@@ -6,9 +6,12 @@ const SessionSchema = new mongoose.Schema({
     UserId: String,
     startTime: {
         type: Date,
-        default: Date.now
+        default: () => Date.now()
     },
-    endTime: Date,
+    endTime: {
+        type: Date,
+        default: () => Date.now() + 3 * 60 * 60 * 1000 // 3 hours from now
+    },
     instanceId: String,
     url: String,
     active: {
