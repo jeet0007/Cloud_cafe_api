@@ -81,28 +81,28 @@ exports.playGame = async (req, res) => {
                 data: game,
             });
         }
-        if (userHasEnoughCredit) {
-            // TODO:Check prior sessions
-            const query = Session.where({
-                UserId: userId,
-                GameId: gameId,
-                active: true
-            })
-            let exixtSession = false;
-            query.findOne((err, session) => {
-                if (err) {
-                    console.log("No sessions found")
-                }
-                if (session) {
-                    console.log("Session found", session)
-                    exixtSession = true;
-                    return res.status(200).send({
-                        message: "Success",
-                        data: session
-                    })
-                }
-            })
-            if (exixtSession === false) {
+        // TODO:Check prior sessions
+        const query = Session.where({
+            UserId: userId,
+            GameId: gameId,
+            active: true
+        })
+        let exixtSession = false;
+        query.findOne((err, session) => {
+            if (err) {
+                console.log("No sessions found")
+            }
+            if (session) {
+                console.log("Session found", session)
+                exixtSession = true;
+                return res.status(200).send({
+                    message: "Success",
+                    data: session
+                })
+            }
+        })
+        if (exixtSession === false) {
+            if (userHasEnoughCredit) {
                 //create an instance
                 const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
                 // { message: "Success", data: "sir-yvfg2ixq" };
@@ -153,14 +153,15 @@ exports.playGame = async (req, res) => {
                         })
                     }
                 }
+            } else {
+                return res.status(200).send({
+                    message: "Failed",
+                    reason: "Not enough balance",
+                    data: game
+                })
             }
-        } else {
-            return res.status(200).send({
-                message: "Failed",
-                reason: "Not enough balance",
-                data: game
-            })
         }
+
     } else {
         return res.status(200).send({
             message: "Failed",
