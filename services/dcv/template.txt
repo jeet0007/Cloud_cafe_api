@@ -1,0 +1,13 @@
+[version]
+format=1.0
+[connect]
+host=13.229.59.95
+port=8443
+weburlpath=
+sessionid=
+proxyport=0
+proxytype=none
+transport=websocket
+quicport=
+[options]
+fullscreen=true

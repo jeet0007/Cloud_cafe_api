@@ -1,7 +1,9 @@
-const awsService = require("../services/aws/aws_instance")
+const awsService = require("../services/aws/aws_instance");
+const dcvService = require("../services/dcv/dcvfilegenerator");
 const Game = require("../models/Game");
 const Session = require("../models/Session");
 const User = require("../models/User");
+
 
 // setup instance params
 
@@ -166,6 +168,32 @@ exports.playGame = async (req, res) => {
         return res.status(200).send({
             message: "Failed",
             data: "Game not found"
+        })
+    }
+}
+
+exports.generateDcvFile = async (req, res) => {
+    const sessionId = req.params.SessionId;
+    if (!sessionId) {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Incomplete information"
+        })
+    }
+    const session = await Session.findById(sessionId);
+    if (session) {
+        const publicIp = ((session.url).replace("https://", "")).replace(":8443/", ""); //https://54.179.81.205:8443/
+        const file = await dcvService.generateFile(publicIp);
+        res.writeHead(200, {
+            'Content-Type': 'application/force-download',
+            'Content-disposition': 'attachment; filename=CloudCafe.dcv'
+        });
+        return res.end(file);
+
+    } else {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Session not found"
         })
     }
 }
