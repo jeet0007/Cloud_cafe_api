@@ -48,6 +48,7 @@ exports.getGameById = async (req, res) => {
 }
 
 exports.playGame = async (req, res) => {
+    try { } catch (err) { }
     const { userId, gameId } = req.body;
     console.log(req.body)
     if (!userId || !gameId) {
@@ -97,7 +98,7 @@ exports.playGame = async (req, res) => {
             if (session) {
                 console.log("Session found", session)
                 exixtSession = true;
-                res.status(200).send({
+                return res.status(200).send({
                     message: "Success",
                     data: session
                 })
