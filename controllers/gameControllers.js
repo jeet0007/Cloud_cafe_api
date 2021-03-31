@@ -48,7 +48,7 @@ exports.getGameById = async (req, res) => {
 }
 
 exports.playGame = async (req, res) => {
-    try { } catch (err) { }
+
     const { userId, gameId } = req.body;
     console.log(req.body)
     if (!userId || !gameId) {
@@ -79,7 +79,7 @@ exports.playGame = async (req, res) => {
         console.log("Game Found", game);
 
         if (game.isFlash || game.ami === "") {
-            res.status(200).json({
+            return res.status(200).json({
                 message: "Success",
                 data: game,
             });
