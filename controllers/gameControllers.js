@@ -14,13 +14,13 @@ exports.getAllGames = async (req, res) => {
         let query = Game.find();
         const result = await query;
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             data: result,
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({
+        return res.status(500).json({
             status: "error",
             message: "Server Error",
         });
@@ -34,13 +34,13 @@ exports.getGameById = async (req, res) => {
         let query = Game.findById(id);
         const result = await query;
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             data: result,
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({
+        return res.status(500).json({
             status: "error",
             message: "Server Error",
         });
@@ -78,7 +78,7 @@ exports.playGame = async (req, res) => {
         console.log("Game Found", game);
 
         if (game.isFlash || game.ami === "") {
-            return res.status(200).json({
+            res.status(200).json({
                 message: "Success",
                 data: game,
             });
@@ -97,7 +97,7 @@ exports.playGame = async (req, res) => {
             if (session) {
                 console.log("Session found", session)
                 exixtSession = true;
-                return res.status(200).send({
+                res.status(200).send({
                     message: "Success",
                     data: session
                 })
@@ -108,7 +108,7 @@ exports.playGame = async (req, res) => {
                 //create an instance
                 const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
                 // { message: "Success", data: "sir-yvfg2ixq" };
-                await sleep(60000);
+                await sleep(70000);
                 const { message, data } = requestSpotInstance
                 if (message === "Success") {
                     // Will return id
