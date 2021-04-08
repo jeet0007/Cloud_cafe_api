@@ -30,22 +30,33 @@ exports.requestSpotInstances = async (ami) => {
         ec2.requestSpotInstances(params, function (err, data) {
             if (err) {
                 console.log(err, err.stack);
-                resolve({
-                    message: "Failed",
-                    data: err
-                })
+                resolve(null)
             } // an error occurred
             else {
-                console.log("Success fully launched a new instance", data)
-                resolve({
-                    message: "Success",
-                    data: data.SpotInstanceRequests[0].SpotInstanceRequestId
-                })
+                resolve(data.SpotInstanceRequests[0].SpotInstanceRequestId)
             }        // successful response
         });
     })
     return promise
 }
+
+exports.waitForRequestTofullfill = async (requestId) => {
+    console.log("Waiting for : ", requestId)
+    let instanceId = "";
+    while (instanceId === "") {
+
+        const state = await this.describeSpotInstanceRequests(requestId)
+        if (state) {
+            instanceId = state
+        }
+        sleep(10000)
+    }
+    return instanceId;
+}
+
+
+
+
 exports.describeSpotInstanceRequests = async (spotInstanceId) => {
     var params = {
         SpotInstanceRequestIds: [],
@@ -58,21 +69,29 @@ exports.describeSpotInstanceRequests = async (spotInstanceId) => {
         ec2.describeSpotInstanceRequests(params, (err, data) => {
             if (err) {
                 console.log(err, err.stack);
-                resolve({
-                    message: "Failed",
-                    data: err
-                })
+                resolve(null)
             }
             else {
-                console.log("Describe request result : ", data.SpotInstanceRequests[0])
-                resolve({
-                    message: "Success",
-                    data: data.SpotInstanceRequests[0].InstanceId
-                })
+                resolve(data.SpotInstanceRequests[0].InstanceId)
             }
         })
     })
     return promise
+}
+
+exports.waitForInstanceToInitialize = async (instanceId) => {
+    let instanceState = "";
+    while (instanceState === "") {
+        const state = await this.describeInstances(instanceId)
+        if (state) {
+            const { State } = state
+            if (State.Code === 16) {
+                instanceState = State.Name
+            }
+        }
+        sleep(20000)
+    }
+    return instanceState
 }
 
 exports.describeInstances = async (instanceId) => {
@@ -84,17 +103,10 @@ exports.describeInstances = async (instanceId) => {
             let instanceRunning = false
             ec2.describeInstances(params, function (err, data) {
                 if (err) {
-                    resolve({
-                        message: "Failed",
-                        data: err
-                    })
+                    resolve(null)
                 }
                 if (data) {
-                    console.log("List of reservations", data.Reservations[0])
-                    resolve({
-                        message: "Success",
-                        data: data.Reservations[0].Instances[0]
-                    })
+                    resolve(data.Reservations[0].Instances[0])
                 }
             });
         })
@@ -136,4 +148,8 @@ exports.terminateInstances = async (instanceId) => {
         }
         */
     });
+}
+
+async function sleep(millis) {
+    return new Promise(resolve => setTimeout(resolve, millis));
 }

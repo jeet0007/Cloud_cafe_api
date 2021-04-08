@@ -7,20 +7,17 @@ const User = require("../models/User");
 
 // setup instance params
 
-
-
 exports.getAllGames = async (req, res) => {
     try {
         let query = Game.find();
         const result = await query;
-
-        return res.status(200).json({
+        res.status(200).json({
             status: "success",
             data: result,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        res.status(500).json({
             status: "error",
             message: "Server Error",
         });
@@ -48,28 +45,24 @@ exports.getGameById = async (req, res) => {
 }
 
 exports.playGame = async (req, res) => {
-
     const { userId, gameId } = req.body;
     console.log(req.body)
     if (!userId || !gameId) {
         return res.status(400).send({
             message: "Failed",
-            data: "Incomplete information"
+            data: "Incomplete information",
+            code: 206
         })
     }
-
-    //Check user credits
+    //Check user exists
     const user = await User.findById(userId);
-    let userHasEnoughCredit = false;
     if (user) {
         console.log("User Found", user.username);
-        if (user.credits > 50) {
-            userHasEnoughCredit = true
-        }
     } else {
         return res.status(200).send({
             message: "Failed",
-            data: "User not found"
+            data: "User not found",
+            code: 404
         })
     }
     // get game info
@@ -77,99 +70,73 @@ exports.playGame = async (req, res) => {
 
     if (game) {
         console.log("Game Found", game);
-
         if (game.isFlash || game.ami === "") {
             return res.status(200).json({
                 message: "Success",
                 data: game,
+                code: 200
             });
         }
-        // TODO:Check prior sessions
-        const query = Session.where({
-            UserId: userId,
-            GameId: gameId,
-            active: true
-        })
-        let exixtSession = false;
-        query.findOne((err, session) => {
-            if (err) {
-                console.log("No sessions found")
-            }
-            if (session) {
-                console.log("Session found", session)
-                exixtSession = true;
-                return res.status(200).send({
-                    message: "Success",
-                    data: session
-                })
-            }
-        })
-        if (exixtSession === false) {
-            if (userHasEnoughCredit) {
-                //create an instance
-                const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
-                // { message: "Success", data: "sir-yvfg2ixq" };
-                await sleep(70000);
-                const { message, data } = requestSpotInstance
-                if (message === "Success") {
-                    // Will return id
-                    const spotInstanceInfo = await awsService.describeSpotInstanceRequests(data);
-                    if (spotInstanceInfo.message === "Success") {
-                        const InstanceId = spotInstanceInfo.data
-                        console.log("Instanceid : ", spotInstanceInfo)
-                        // Get public ip
-                        const instanceInfo = await awsService.describeInstances(InstanceId);
-                        const instanceInfoData = instanceInfo.data;
-                        console.log("ip:", instanceInfoData)
-                        const { State } = instanceInfoData
-                        if (State.Code === 16) {
-                            console.log("Instance Running");
-                            const { PublicIpAddress } = instanceInfoData;
-                            // create a session 
-                            const newSession = new Session({
-                                UserId: userId,
-                                GameId: gameId,
-                                instanceId: InstanceId,
-                                url: `https://${PublicIpAddress}:8443/`,
-                                active: true
-                            })
-                            await newSession.save()
-                            user.credits -= 50
-                            await user.save()
-                            return res.status(200).send({
-                                message: "Success",
-                                data: {
-                                    url: `https://${PublicIpAddress}:8443/`,
-                                    name: game.name,
-                                    sessionId: newSession._id
-                                }
-                            })
-                        } else if (State.Code === 48) {
-                            console.log("Instance terminated");
-                        } else {
-                            console.log("Instance was not running")
-                        }
-                        //return geme with url
-                        return res.status(200).send({
-                            message: "Success",
-                            data: game
-                        })
-                    }
-                }
-            } else {
-                return res.status(200).send({
-                    message: "Failed",
-                    reason: "Not enough balance",
-                    data: game
-                })
-            }
-        }
-
     } else {
         return res.status(200).send({
             message: "Failed",
-            data: "Game not found"
+            data: "Game not found",
+            code: 404
         })
+    }
+    //Check prior sessions
+    const query = Session.where({
+        UserId: userId,
+        GameId: gameId,
+        active: true
+    })
+
+    const session = await query.findOne();
+
+    if (session) {
+        return res.json({
+            message: "Failed",
+            data: "Session found",
+            code: 700
+        })
+    }
+    // check user credits
+    if (user.credits < 50) {
+        return res.json({
+            message: "Failed",
+            data: "Incuffecient Credits",
+            code: 406
+        })
+    }
+
+    res.status(200).json({
+        message: "Success",
+        data: game
+    })
+    const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
+
+    if (requestSpotInstance) {
+        console.log("Request submited")
+        // Request submitted got request id 
+        console.log("Spot request id : ", requestSpotInstance)
+        // Wait for request to be fullfiled
+        const instanceId = await awsService.waitForRequestTofullfill(requestSpotInstance);
+        console.log("recieved", instanceId)
+        // wait for instance to finish initilizing 
+        const instanceLaunched = await awsService.waitForInstanceToInitialize(instanceId)
+        console.log("Instance state", instanceLaunched)
+
+        const { PublicIpAddress } = await awsService.describeInstances(instanceId)
+        console.log(PublicIpAddress);
+
+        const newSession = new Session({
+            UserId: userId,
+            GameId: gameId,
+            instanceId: instanceId,
+            url: `https://${PublicIpAddress}:8443/`,
+            active: true
+        })
+        await newSession.save()
     }
 }
 

@@ -17,7 +17,8 @@ const SessionSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true
-    }
+    },
+    state: String
 
 });
 
