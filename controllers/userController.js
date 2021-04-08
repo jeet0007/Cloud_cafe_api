@@ -48,7 +48,7 @@ exports.register = async (req, res) => {
             error: "Incomplete Information"
         })
     }
-
+    console.log("authenticating")
     const query = User.where({ username: username })
     try {
         const result = await query.findOne(function (err, user) {
