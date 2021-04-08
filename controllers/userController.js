@@ -188,14 +188,18 @@ exports.endSession = async (req, res) => {
 
     const session = await Session.findById(sessionId);
     if (session) {
-        await awsService.terminateInstances(session.instanceId);
-        session.active = false;
-        session.endTime = Date.now();
-        await session.save();
-        res.status(200).send({
-            message: "Success",
-            data: session,
-        })
+        const endSession = await awsService.terminateInstances(session.instanceId);
+        if (endSession === "Success") {
+            session.active = false;
+            session.endTime = Date.now();
+            await session.save();
+
+
+            res.status(200).send({
+                message: "Success",
+                data: session,
+            })
+        }
     } else {
         return res.send(404).send({
             message: "Failed",

@@ -124,12 +124,15 @@ exports.terminateInstances = async (instanceId) => {
         InstanceIds: []
     };
     params.InstanceIds.push(instanceId)
-    ec2.terminateInstances(params, function (err, data) {
-        if (err) {
-            console.log(err, err.stack);
-        } else {
-            console.log(data);
-        }                            // successful response
+    const promise = new Promise(function (resolve, reject) {
+        ec2.terminateInstances(params, function (err, data) {
+            if (err) {
+                reject(err)
+            } else {
+                resolve("Success")
+            }
+        })
+        return promise
         /*
         data = {
             TerminatingInstances: [
