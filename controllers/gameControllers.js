@@ -70,9 +70,15 @@ exports.playGame = async (req, res) => {
 
     if (game) {
         console.log("Game Found", game);
-        if (game.isFlash || game.ami === "") {
+        if (game.isFlash) {
             return res.status(200).json({
                 message: "Success",
+                data: game,
+                code: 200
+            });
+        } else if (game.ami === "") {
+            return res.status(200).json({
+                message: "Failed",
                 data: game,
                 code: 200
             });

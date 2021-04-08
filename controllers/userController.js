@@ -145,7 +145,37 @@ exports.authenticate = async (req, res) => {
         })
     }
 }
+
 exports.getAllSessions = async (req, res) => {
+    const UserId = (req.params.UserId);
+    console.log("Getting all sessions :", UserId)
+    if (!UserId) {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Incomplete info"
+        })
+    }
+
+    const query = Session.where({
+        UserId: UserId
+    })
+    query.find((err, sessions) => {
+        if (err) {
+            console.log("No sessions found")
+            return res.status(200).send({
+                message: "Failed",
+                data: "no sessions found"
+            })
+        }
+        if (sessions) {
+            return res.status(200).send({
+                message: "Success",
+                data: sessions
+            })
+        }
+    })
+}
+exports.getActiveSessions = async (req, res) => {
     const UserId = (req.params.UserId);
     console.log("Getting all sessions :", UserId)
     if (!UserId) {
@@ -191,9 +221,10 @@ exports.endSession = async (req, res) => {
         const endSession = await awsService.terminateInstances(session.instanceId);
         if (endSession === "Success") {
             session.active = false;
-            session.endTime = Date.now();
+            session.endTime = new Date().toLocaleDateString('th');
+            const duration = session.endTime - startTime
+            console.log("Duration : ", duration)
             await session.save();
-
 
             res.status(200).send({
                 message: "Success",

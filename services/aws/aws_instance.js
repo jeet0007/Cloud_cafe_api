@@ -132,25 +132,8 @@ exports.terminateInstances = async (instanceId) => {
                 resolve("Success")
             }
         })
-        return promise
-        /*
-        data = {
-            TerminatingInstances: [
-            {
-            CurrentState: {
-            Code: 32, 
-            Name: "shutting-down"
-            }, 
-            InstanceId: "i-1234567890abcdef0", 
-            PreviousState: {
-            Code: 16, 
-            Name: "running"
-            }
-            }
-            ]
-        }
-        */
     });
+    return promise
 }
 
 async function sleep(millis) {

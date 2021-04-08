@@ -6,11 +6,11 @@ const SessionSchema = new mongoose.Schema({
     UserId: String,
     startTime: {
         type: Date,
-        default: () => Date.now()
+        default: () => Date.now().toLocaleDateString("th")
     },
     endTime: {
         type: Date,
-        default: () => Date.now() + 3 * 60 * 60 * 1000 // 3 hours from now
+        default: () => Date.now().toLocaleDateString("th") + 3 * 60 * 60 * 1000 // 3 hours from now
     },
     instanceId: String,
     url: String,
@@ -18,7 +18,10 @@ const SessionSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    state: String
+    duration: {
+        type: Number,
+        default: 0
+    }
 
 });
 
