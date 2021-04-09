@@ -223,7 +223,7 @@ exports.endSession = async (req, res) => {
     if (session) {
         const endSession = await awsService.terminateInstances(session.instanceId);
         if (endSession === "Success") {
-            // session.active = false;
+            session.active = false;
             session.endTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
             const duration = await getDiff(session.startTime, session.endTime);
             session.duration = duration;
