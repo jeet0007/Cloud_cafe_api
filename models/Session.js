@@ -6,11 +6,11 @@ const SessionSchema = new mongoose.Schema({
     UserId: String,
     startTime: {
         type: Date,
-        default: () => Date.now().toLocaleDateString("th")
+        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
     },
     endTime: {
         type: Date,
-        default: () => Date.now().toLocaleDateString("th") + 3 * 60 * 60 * 1000 // 3 hours from now
+        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) + 3 * 60 * 60 * 1000 // 3 hours from now
     },
     instanceId: String,
     url: String,
@@ -20,10 +20,9 @@ const SessionSchema = new mongoose.Schema({
     },
     duration: {
         type: Number,
-        default: 0
+        default: 0.0
     }
-
-});
+}, { timestamps: true });
 
 
 const Session = mongoose.model("Session", SessionSchema, "Sessions");

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const Session = require("../models/Session");
+const Game = require("../models/Game")
 const awsService = require("../services/aws/aws_instance")
 
 
@@ -148,7 +149,6 @@ exports.authenticate = async (req, res) => {
 
 exports.getAllSessions = async (req, res) => {
     const UserId = (req.params.UserId);
-    console.log("Getting all sessions :", UserId)
     if (!UserId) {
         return res.status(200).send({
             message: "Failed",
@@ -156,9 +156,12 @@ exports.getAllSessions = async (req, res) => {
         })
     }
 
+    console.log("Getting all sessions :", UserId)
     const query = Session.where({
         UserId: UserId
     })
+    //get info from session and get game info extract data
+
     query.find((err, sessions) => {
         if (err) {
             console.log("No sessions found")
@@ -220,16 +223,24 @@ exports.endSession = async (req, res) => {
     if (session) {
         const endSession = await awsService.terminateInstances(session.instanceId);
         if (endSession === "Success") {
-            session.active = false;
-            session.endTime = new Date().toLocaleDateString('th');
-            const duration = session.endTime - startTime
-            console.log("Duration : ", duration)
+            // session.active = false;
+            session.endTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+            const duration = await getDiff(session.startTime, session.endTime);
+            session.duration = duration;
             await session.save();
-
-            res.status(200).send({
+            const returnData = {
+                sessionId: session._id,
+                startTime: session.startTime,
+                endTime: session.endTime,
+                duration: duration,
+                GameId: session.GameId
+            }
+            res.status(200).json({
                 message: "Success",
-                data: session,
+                data: returnData,
             })
+        } else {
+            console.log(endSession)
         }
     } else {
         return res.send(404).send({
@@ -239,5 +250,9 @@ exports.endSession = async (req, res) => {
     }
 }
 
-
-
+async function getDiff(a, b) {
+    let duration = ((new Date(b) - new Date(a)) / 1000) / 60 //Convert to minutes
+    duration = Math.round((duration + Number.EPSILON) * 100) / 100
+    console.log("Duration: ", duration)
+    return duration
+}

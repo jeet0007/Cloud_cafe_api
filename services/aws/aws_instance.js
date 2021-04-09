@@ -127,6 +127,10 @@ exports.terminateInstances = async (instanceId) => {
     const promise = new Promise(function (resolve, reject) {
         ec2.terminateInstances(params, function (err, data) {
             if (err) {
+                const { statusCode } = err
+                if (statusCode === 400) {
+                    resolve("Success")
+                }
                 reject(err)
             } else {
                 resolve("Success")
