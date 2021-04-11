@@ -257,6 +257,13 @@ exports.endSession = async (req, res) => {
                 duration: duration,
                 GameId: session.GameId
             }
+
+            const user = await User.findById(session.UserId)
+            if (user) {
+                user.credits -= 50
+                await user.save()
+            }
+
             res.status(200).json({
                 message: "Success",
                 data: returnData,
