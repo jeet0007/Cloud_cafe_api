@@ -210,6 +210,28 @@ exports.getActiveSessions = async (req, res) => {
     })
 }
 
+exports.getSessionById = async (req, res) => {
+    const sessionId = (req.params.SessionId);
+    if (!sessionId) {
+        return res.send(404).send({
+            message: "Failed",
+            data: "Incomplete information"
+        })
+    }
+    const session = await Session.findById(sessionId);
+    if (session) {
+        return res.status(200).send({
+            message: "Success",
+            data: session
+        })
+    } else {
+        return res.send(404).send({
+            message: "Failed",
+            data: "Session not found"
+        })
+    }
+}
+
 exports.endSession = async (req, res) => {
     const sessionId = (req.params.SessionId);
     if (!sessionId) {

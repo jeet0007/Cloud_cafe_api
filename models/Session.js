@@ -10,7 +10,7 @@ const SessionSchema = new mongoose.Schema({
     },
     endTime: {
         type: Date,
-        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) + 3 * 60 * 60 * 1000 // 3 hours from now
+        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
     },
     instanceId: String,
     url: String,
@@ -18,6 +18,7 @@ const SessionSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    state: String,
     duration: {
         type: Number,
         default: 0.0

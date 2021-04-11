@@ -100,9 +100,10 @@ exports.playGame = async (req, res) => {
     const session = await query.findOne();
 
     if (session) {
+        console.log("returned active session", session._id)
         return res.json({
             message: "Failed",
-            data: "Session found",
+            data: session._id,
             code: 700
         })
     }
@@ -114,10 +115,17 @@ exports.playGame = async (req, res) => {
             code: 406
         })
     }
+    const newSession = new Session({
+        UserId: userId,
+        GameId: gameId,
+        state: "Requesting"
+    })
+    await newSession.save()
 
     res.status(200).json({
         message: "Success",
-        data: game
+        data: newSession._id,
+        code: 200
     })
     const requestSpotInstance = await awsService.requestSpotInstances(game.ami)
 
@@ -129,20 +137,14 @@ exports.playGame = async (req, res) => {
         const instanceId = await awsService.waitForRequestTofullfill(requestSpotInstance);
         console.log("recieved", instanceId)
         // wait for instance to finish initilizing 
+        await Session.updateOne({ _id: newSession._id }, { state: "Innitiating" })
+
         const instanceLaunched = await awsService.waitForInstanceToInitialize(instanceId)
         console.log("Instance state", instanceLaunched)
 
         const { PublicIpAddress } = await awsService.describeInstances(instanceId)
         console.log(PublicIpAddress);
-
-        const newSession = new Session({
-            UserId: userId,
-            GameId: gameId,
-            instanceId: instanceId,
-            url: `https://${PublicIpAddress}:8443/`,
-            active: true
-        })
-        await newSession.save()
+        await Session.updateOne({ _id: newSession._id }, { instanceId: instanceId, url: `https://${PublicIpAddress}:8443/`, state: "Launched", active: true })
     }
 }
 

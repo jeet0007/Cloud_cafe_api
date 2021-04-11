@@ -18,12 +18,12 @@ exports.requestSpotInstances = async (ami) => {
         LaunchSpecification: {
             ImageId: ami,
             KeyName: "shivCloudKey1",
-            InstanceType: "g4dn.xlarge",
+            InstanceType: "t2.micro",
             Placement: {
                 AvailabilityZone: "ap-southeast-1a"
             }
         },
-        SpotPrice: "0.45"
+        SpotPrice: "0.1"
     };
     // g4dn.xlarge
     const promise = new Promise(function (resolve, reject) {
