@@ -46,7 +46,6 @@ exports.getGameById = async (req, res) => {
 
 exports.playGame = async (req, res) => {
     const { userId, gameId } = req.body;
-    console.log(req.body)
     if (!userId || !gameId) {
         return res.status(400).send({
             message: "Failed",
@@ -69,18 +68,19 @@ exports.playGame = async (req, res) => {
     const game = await Game.findById(gameId);
 
     if (game) {
-        console.log("Game Found", game);
+        console.log("Game Found", game.name);
         if (game.isFlash) {
             return res.status(200).json({
                 message: "Success",
                 data: game,
                 code: 200
             });
-        } else if (game.ami === "") {
+        } else if (game.ami === "None") {
+            console.log("Game ami not available");
             return res.status(200).json({
                 message: "Failed",
-                data: game,
-                code: 200
+                data: "Game has not been configured",
+                code: 204
             });
         }
     } else {
