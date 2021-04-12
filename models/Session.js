@@ -9,8 +9,7 @@ const SessionSchema = new mongoose.Schema({
         default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
     },
     endTime: {
-        type: Date,
-        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+        type: Date
     },
     instanceId: String,
     url: String,

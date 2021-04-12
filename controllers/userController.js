@@ -220,6 +220,10 @@ exports.getSessionById = async (req, res) => {
     }
     const session = await Session.findById(sessionId);
     if (session) {
+        const duration = await getDiff(session.startTime, new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }));
+        session.duration = duration;
+        await session.save()
+
         return res.status(200).send({
             message: "Success",
             data: session
@@ -280,8 +284,9 @@ exports.endSession = async (req, res) => {
 }
 
 async function getDiff(a, b) {
-    let duration = ((new Date(b) - new Date(a)) / 1000) / 60 //Convert to minutes
-    duration = Math.round((duration + Number.EPSILON) * 100) / 100
+    console.log({ Time_a: new Date(a), time_b: new Date(b) })
+    let duration = Math.round(((new Date(b) - new Date(a)) + Number.EPSILON) * 100) / 100//((new Date(b) - new Date(a)) / 1000) / 60 //Convert to minutes
+    duration = (duration / 1000) / 60
     console.log("Duration: ", duration)
     return duration
 }
