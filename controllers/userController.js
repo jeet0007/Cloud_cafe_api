@@ -4,7 +4,9 @@ const Session = require("../models/Session");
 const Game = require("../models/Game")
 const awsService = require("../services/aws/aws_instance");
 const { session } = require("passport");
-
+const { zonedTimeToUtc, utcToZonedTime, format } = require('date-fns-tz')
+const differenceInSeconds = require('date-fns/differenceInSeconds');
+const { parseISO } = require("date-fns");
 
 
 exports.getUserbyId = async (req, res) => {
@@ -255,7 +257,7 @@ exports.getSessionById = async (req, res) => {
     }
     const session = await Session.findById(sessionId);
     if (session) {
-        const duration = await getDiff(session.startTime, formatDateWithZone());
+        const duration = await getDiff(session.startTime, getCurrentDate());
         session.duration = duration;
         await session.save()
 
@@ -285,9 +287,11 @@ exports.endSession = async (req, res) => {
         const endSession = await awsService.terminateInstances(session.instanceId);
         if (endSession === "Success") {
             session.active = false;
-            session.endTime = formatDateWithZone()
+            session.endTime = getCurrentDate()
+            console.log("Ended date :", session.endTime);
             const duration = await getDiff(session.startTime, session.endTime);
             session.duration = duration;
+            console.log("Ended duration :", duration);
             session.state = "Ended"
             await session.save();
             const returnData = {
@@ -318,16 +322,30 @@ exports.endSession = async (req, res) => {
         })
     }
 }
-function formatDateWithZone() {
-    var s = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+function formatDateWithZone(time) {
+    var s = time.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
     var a = s.split(/\D/);
     return a[2] + '-' + a[1] + '-' + a[0] + ' ' + a[3] + ':' + a[4] + ':' + a[5];
 }
 
 async function getDiff(a, b) {
-    console.log({ Time_a: new Date(a), time_b: new Date(b) })
-    let duration = Math.round(((new Date(b) - new Date(a)) + Number.EPSILON) * 100) / 100//((new Date(b) - new Date(a)) / 1000) / 60 //Convert to minutes
-    duration = (duration / 1000) / 60
-    console.log("Duration: ", duration)
-    return duration
+    console.log({
+        start: a,
+        end: b
+    });
+    const start = new Date(a).getTime();
+    const end = new Date(b).getTime()
+    const diffrenceInSec = differenceInSeconds(end, start);
+    console.log(diffrenceInSec, "sec")
+    return diffrenceInSec
+}
+
+
+function getCurrentDate() {
+    const date = new Date()
+    const timeZone = 'Asia/Bangkok'
+    const pattern = 'yyy-MM-dd*HH:mm:ss'
+    const zonedDate = utcToZonedTime(date, timeZone)
+    const output = format(zonedDate, pattern, { timeZone: timeZone }).replace("*", "T")
+    return output
 }
