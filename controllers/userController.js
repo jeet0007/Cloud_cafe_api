@@ -180,6 +180,38 @@ exports.getAllSessions = async (req, res) => {
         })
         .limit(10)
 }
+
+exports.getEnddedSessions = async (req, res) => {
+    const UserId = (req.params.UserId);
+    console.log("Getting all sessions :", UserId)
+    if (!UserId) {
+        return res.status(200).send({
+            message: "Failed",
+            data: "Incomplete info"
+        })
+    }
+
+    const query = Session.where({
+        UserId: UserId,
+        active: false
+    })
+    query.find((err, sessions) => {
+        if (err) {
+            console.log("No sessions found")
+            return res.status(200).send({
+                message: "Failed",
+                data: "no sessions found"
+            })
+        }
+        if (sessions) {
+            console.log("Sessions found", sessions);
+            return res.status(200).send({
+                message: "Success",
+                data: sessions
+            })
+        }
+    })
+}
 exports.getActiveSessions = async (req, res) => {
     const UserId = (req.params.UserId);
     console.log("Getting all sessions :", UserId)
@@ -204,6 +236,7 @@ exports.getActiveSessions = async (req, res) => {
         }
         if (sessions) {
             console.log("Sessions found", sessions);
+
             return res.status(200).send({
                 message: "Success",
                 data: sessions
@@ -252,7 +285,7 @@ exports.endSession = async (req, res) => {
         const endSession = await awsService.terminateInstances(session.instanceId);
         if (endSession === "Success") {
             session.active = false;
-            session.endTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+            session.endTime = formatDateWithZone()
             const duration = await getDiff(session.startTime, session.endTime);
             session.duration = duration;
             session.state = "Ended"
