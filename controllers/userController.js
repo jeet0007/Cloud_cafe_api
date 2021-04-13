@@ -2,7 +2,8 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const Session = require("../models/Session");
 const Game = require("../models/Game")
-const awsService = require("../services/aws/aws_instance")
+const awsService = require("../services/aws/aws_instance");
+const { session } = require("passport");
 
 
 
@@ -160,23 +161,24 @@ exports.getAllSessions = async (req, res) => {
     const query = Session.where({
         UserId: UserId
     })
-    //get info from session and get game info extract data
 
-    query.find((err, sessions) => {
-        if (err) {
-            console.log("No sessions found")
-            return res.status(200).send({
-                message: "Failed",
-                data: "no sessions found"
-            })
-        }
-        if (sessions) {
-            return res.status(200).send({
-                message: "Success",
-                data: sessions
-            })
-        }
-    })
+    await query
+        .find((err, sessions) => {
+            if (err) {
+                console.log("No sessions found")
+                return res.status(200).send({
+                    message: "Failed",
+                    data: "no sessions found"
+                })
+            }
+            if (sessions) {
+                return res.status(200).send({
+                    message: "Success",
+                    data: sessions
+                })
+            }
+        })
+        .limit(10)
 }
 exports.getActiveSessions = async (req, res) => {
     const UserId = (req.params.UserId);
@@ -220,7 +222,7 @@ exports.getSessionById = async (req, res) => {
     }
     const session = await Session.findById(sessionId);
     if (session) {
-        const duration = await getDiff(session.startTime, new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }));
+        const duration = await getDiff(session.startTime, formatDateWithZone());
         session.duration = duration;
         await session.save()
 
@@ -253,6 +255,7 @@ exports.endSession = async (req, res) => {
             session.endTime = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
             const duration = await getDiff(session.startTime, session.endTime);
             session.duration = duration;
+            session.state = "Ended"
             await session.save();
             const returnData = {
                 sessionId: session._id,
@@ -281,6 +284,11 @@ exports.endSession = async (req, res) => {
             data: "Session not found"
         })
     }
+}
+function formatDateWithZone() {
+    var s = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+    var a = s.split(/\D/);
+    return a[2] + '-' + a[1] + '-' + a[0] + ' ' + a[3] + ':' + a[4] + ':' + a[5];
 }
 
 async function getDiff(a, b) {

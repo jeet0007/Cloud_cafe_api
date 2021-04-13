@@ -30,15 +30,30 @@ exports.getGameById = async (req, res) => {
     try {
         let query = Game.findById(id);
         const result = await query;
-
-        return res.status(200).json({
-            status: "success",
-            data: result,
-        });
+        if (result) {
+            const custom_res = {
+                images: result.images,
+                isFlash: result.isFlash,
+                name: result.name,
+                provider: result.provider,
+                price: result.price,
+                url: result.url,
+                _id: result._id
+            }
+            res.status(200).json({
+                status: "success",
+                data: custom_res,
+            });
+        } else {
+            res.status(404).json({
+                status: "Failed",
+                message: "Game not found",
+            });
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
-            status: "error",
+            status: "Failed",
             message: "Server Error",
         });
     }

@@ -1,12 +1,18 @@
 const mongoose = require("mongoose");
 
 
+function formatDateWithZone() {
+    var s = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+    var a = s.split(/\D/);
+    return a[2] + '-' + a[1] + '-' + a[0] + ' ' + a[3] + ':' + a[4] + ':' + a[5];
+}
+
 const SessionSchema = new mongoose.Schema({
     GameId: String,
     UserId: String,
     startTime: {
         type: Date,
-        default: () => new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+        default: () => formatDateWithZone()
     },
     endTime: {
         type: Date
