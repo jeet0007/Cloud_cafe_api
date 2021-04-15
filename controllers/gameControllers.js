@@ -89,7 +89,7 @@ exports.playGame = async (req, res) => {
             return res.status(200).json({
                 message: "Success",
                 data: game,
-                code: 200
+                code: 203
             });
         } else if (game.ami === "None") {
             console.log("Game ami not available");
